@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Workflow · Push &amp; Pull Knowledge Base</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --surface:#161b22;
+    --surface-2:#1c2330;
+    --border:#2d3644;
+    --text:#e6edf3;
+    --muted:#9aa7b8;
+    --accent:#f97316;
+    --accent-2:#38bdf8;
+    --green:#3fb950;
+    --line:#33445c;
+    --code-bg:#0b0f16;
+    --radius:16px;
+    --maxw:860px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.65;font-size:16px;
+    padding:0 16px calc(56px + env(safe-area-inset-bottom));
+    background-image:radial-gradient(1200px 400px at 100% -10%,rgba(249,115,22,.12),transparent),radial-gradient(900px 400px at -10% 8%,rgba(56,189,248,.10),transparent);
+  }
+
+  /* Header */
+  header{max-width:var(--maxw);margin:0 auto;padding:44px 0 20px;text-align:center}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;background:var(--surface);
+    border:1px solid var(--border);color:var(--muted);padding:6px 14px;
+    border-radius:999px;font-size:13px;font-weight:600;margin-bottom:18px;
+  }
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(63,185,80,.15)}
+  h1{
+    font-size:clamp(28px,7vw,42px);line-height:1.15;letter-spacing:-.02em;margin-bottom:14px;
+    background:linear-gradient(120deg,#fff,#c9d4e2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  header p{color:var(--muted);font-size:clamp(15px,4vw,18px);max-width:620px;margin:0 auto}
+  .repo-pill{
+    display:inline-flex;align-items:center;gap:8px;margin-top:20px;background:var(--surface-2);
+    border:1px solid var(--border);padding:8px 16px;border-radius:12px;font-size:13px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent-2);word-break:break-all;
+  }
+
+  /* Cycle diagram */
+  .cycle{
+    max-width:var(--maxw);margin:26px auto 8px;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;
+  }
+  .cycle-title{text-align:center;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+  .cycle-flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+  .cycle-flow .chip{
+    display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);
+    padding:9px 13px;border-radius:10px;font-size:13.5px;font-weight:600;white-space:nowrap;
+  }
+  .cycle-flow .chip .e{font-size:15px}
+  .cycle-flow .arw{color:var(--accent);font-weight:800;font-size:15px}
+
+  /* Workflow timeline */
+  main{max-width:var(--maxw);margin:34px auto 0}
+  .stage{position:relative;padding-left:64px;padding-bottom:20px}
+  /* vertical connector line */
+  .stage::before{
+    content:"";position:absolute;left:23px;top:6px;bottom:-6px;width:2px;
+    background:linear-gradient(var(--line),var(--line));
+  }
+  .stage:last-child::before{display:none}
+  .stage .marker{
+    position:absolute;left:0;top:0;width:48px;height:48px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),#fb923c);color:#1a0f05;
+    display:grid;place-items:center;font-size:20px;font-weight:800;
+    box-shadow:0 4px 14px rgba(249,115,22,.28);z-index:1;
+  }
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:clamp(18px,4.5vw,28px);scroll-margin-top:16px;
+  }
+  .card .tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--accent);background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);
+    padding:3px 9px;border-radius:6px;margin-bottom:10px;
+  }
+  h2{font-size:clamp(19px,5vw,25px);letter-spacing:-.01em;line-height:1.25;margin-bottom:6px}
+  h3{font-size:16px;margin:20px 0 9px;color:#fff}
+  p{margin-bottom:12px}
+  p.lead{color:var(--muted)}
+  ul,ol{margin:0 0 12px 20px}
+  li{margin-bottom:8px}
+  strong{color:#fff}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:var(--surface-2);border:1px solid var(--border);padding:1px 6px;border-radius:6px;color:#cdd9e5}
+  a.link{color:var(--accent-2);text-decoration:none;border-bottom:1px solid rgba(56,189,248,.35)}
+  a.link:hover{border-bottom-color:var(--accent-2)}
+
+  /* Code blocks */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .code pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.7;color:#cdd9e5;white-space:pre}
+  .code .c{color:#7d8fa3}
+  .code .k{color:#f97316}
+  .code .s{color:#7ee787}
+
+  /* Callouts */
+  .tip,.warn{border-radius:12px;padding:13px 15px;margin:14px 0;font-size:14.5px;border:1px solid;display:flex;gap:10px;align-items:flex-start}
+  .tip{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.3)}
+  .warn{background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.3)}
+  .tip .ico,.warn .ico{flex:none;font-size:17px}
+  .tip strong{color:var(--accent-2)}
+  .warn strong{color:var(--accent)}
+
+  /* branch → PR → deploy mini-flows */
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0;justify-content:center}
+  .flow .node{background:var(--surface-2);border:1px solid var(--border);padding:8px 12px;border-radius:9px;font-size:13px;font-weight:600;white-space:nowrap}
+  .flow .arw{color:var(--accent);font-weight:700}
+
+  footer{max-width:var(--maxw);margin:30px auto 0;text-align:center;color:var(--muted);font-size:13px;padding-top:24px;border-top:1px solid var(--border)}
+  footer a{color:var(--accent-2);text-decoration:none}
+
+  @media (max-width:520px){
+    .stage{padding-left:52px}
+    .stage::before{left:19px}
+    .stage .marker{width:40px;height:40px;border-radius:12px;font-size:17px}
+    .cycle-flow{flex-direction:column;align-items:stretch}
+    .cycle-flow .arw{transform:rotate(90deg)}
+    .cycle-flow .chip{justify-content:center}
+    .flow{flex-direction:column;align-items:stretch}
+    .flow .arw{transform:rotate(90deg);text-align:center}
+    .flow .node{text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge"><span class="dot"></span> Team Workflow</div>
+  <h1>The GitHub Push &amp; Pull Workflow</h1>
+  <p>Follow the flow top to bottom — from creating your office account to deploying on Vercel.</p>
+  <div class="repo-pill">📦 github.com/payprice-design/Push-and-Pull-Knowledge-Base</div>
+</header>
+
+<!-- The everyday loop, shown as a cycle -->
+<div class="cycle">
+  <div class="cycle-title">The everyday loop</div>
+  <div class="cycle-flow">
+    <span class="chip"><span class="e">🌿</span> Branch</span>
+    <span class="arw">→</span>
+    <span class="chip"><span class="e">✏️</span> Commit</span>
+    <span class="arw">→</span>
+    <span class="chip"><span class="e">⬆️</span> Push</span>
+    <span class="arw">→</span>
+    <span class="chip"><span class="e">🔀</span> PR</span>
+    <span class="arw">→</span>
+    <span class="chip"><span class="e">✅</span> Merge</span>
+    <span class="arw">→</span>
+    <span class="chip"><span class="e">🔄</span> Sync</span>
+    <span class="arw">↺</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- STAGE 1 -->
+  <div class="stage" id="s1">
+    <div class="marker">1</div>
+    <div class="card">
+      <span class="tag">Setup · once</span>
+      <h2>Create your GitHub office account</h2>
+      <p class="lead">Use your company email so you can join the <strong>payprice-design</strong> organization.</p>
+      <ol>
+        <li>Go to <a class="link" href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a> and sign up with <strong>your.name@tiket.com</strong> (not a personal email).</li>
+        <li>Pick a recognizable username, e.g. <em>firstname-tiket</em>.</li>
+        <li>Verify the email GitHub sends to your office inbox.</li>
+        <li>Enable <strong>Two-Factor Authentication</strong> under <em>Settings → Password and authentication</em>.</li>
+        <li>Send your username to your org admin to get invited to <strong>payprice-design</strong>, then accept the invite.</li>
+      </ol>
+      <div class="warn"><span class="ico">⚠️</span><div><strong>Passwords &amp; 2FA:</strong> set these up yourself on GitHub — never share credentials or codes with anyone or any tool.</div></div>
+    </div>
+  </div>
+
+  <!-- STAGE 2 -->
+  <div class="stage" id="s2">
+    <div class="marker">2</div>
+    <div class="card">
+      <span class="tag">Setup · once</span>
+      <h2>Clone the repo &amp; identify yourself</h2>
+      <p class="lead">Get the project onto your machine and tell git who you are.</p>
+      <div class="code"><pre><span class="c"># Identify yourself (office identity)</span>
+<span class="k">git</span> config --global user.name <span class="s">"Your Name"</span>
+<span class="k">git</span> config --global user.email <span class="s">"your.name@tiket.com"</span>
+
+<span class="c"># Download the project</span>
+<span class="k">git</span> clone <span class="s">https://github.com/payprice-design/Push-and-Pull-Knowledge-Base.git</span>
+<span class="k">cd</span> <span class="s">Push-and-Pull-Knowledge-Base</span></pre></div>
+    </div>
+  </div>
+
+  <!-- STAGE 3 -->
+  <div class="stage" id="s3">
+    <div class="marker">3</div>
+    <div class="card">
+      <span class="tag">Loop · start of each task</span>
+      <h2>Create a branch</h2>
+      <p class="lead">Never work on <strong>main</strong> directly. Branch per task so work stays isolated and reviewable.</p>
+      <div class="code"><pre><span class="c"># Always start from an up-to-date main</span>
+<span class="k">git</span> checkout <span class="s">main</span>
+<span class="k">git</span> pull
+
+<span class="c"># Create & switch to your task branch</span>
+<span class="k">git</span> checkout -b <span class="s">feature/add-pricing-guide</span></pre></div>
+      <h3>Naming</h3>
+      <ul>
+        <li><code>feature/…</code> — a new addition</li>
+        <li><code>fix/…</code> — a correction</li>
+        <li><code>docs/…</code> — documentation only</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STAGE 4 -->
+  <div class="stage" id="s4">
+    <div class="marker">4</div>
+    <div class="card">
+      <span class="tag">Loop · as you work</span>
+      <h2>Commit your changes</h2>
+      <p class="lead">A commit is a saved snapshot. Commit often, in small logical chunks.</p>
+      <div class="code"><pre><span class="k">git</span> status              <span class="c"># see what changed</span>
+<span class="k">git</span> add .               <span class="c"># stage all changes</span>
+<span class="k">git</span> commit -m <span class="s">"Add pricing FAQ section"</span></pre></div>
+      <div class="tip"><span class="ico">💡</span><div><strong>Good messages</strong> say what &amp; why in the present tense: "Add pricing FAQ section", not "stuff".</div></div>
+    </div>
+  </div>
+
+  <!-- STAGE 5 -->
+  <div class="stage" id="s5">
+    <div class="marker">5</div>
+    <div class="card">
+      <span class="tag">Loop · share your work</span>
+      <h2>Push, Pull &amp; Sync</h2>
+      <p class="lead">Move commits between your computer (local) and GitHub (remote).</p>
+      <div class="flow">
+        <span class="node">💻 Local</span><span class="arw">— push →</span>
+        <span class="node">☁️ GitHub</span><span class="arw">— pull →</span>
+        <span class="node">💻 Local</span>
+      </div>
+      <h3>Push — send commits up</h3>
+      <div class="code"><pre><span class="c"># First push of a branch links it with -u</span>
+<span class="k">git</span> push -u origin <span class="s">feature/add-pricing-guide</span>
+
+<span class="c"># After that, just:</span>
+<span class="k">git</span> push</pre></div>
+      <h3>Pull &amp; Sync — stay current</h3>
+      <div class="code"><pre><span class="c"># Get teammates' latest work on your branch</span>
+<span class="k">git</span> pull
+
+<span class="c"># Bring the newest main into your branch</span>
+<span class="k">git</span> checkout <span class="s">main</span> && <span class="k">git</span> pull
+<span class="k">git</span> checkout <span class="s">feature/add-pricing-guide</span>
+<span class="k">git</span> merge <span class="s">main</span></pre></div>
+      <div class="warn"><span class="ico">⚠️</span><div><strong>Pull before you start</strong> each session to build on the newest version and avoid conflicts.</div></div>
+    </div>
+  </div>
+
+  <!-- STAGE 6 -->
+  <div class="stage" id="s6">
+    <div class="marker">6</div>
+    <div class="card">
+      <span class="tag">Loop · get it reviewed</span>
+      <h2>Contribute &amp; open a Pull Request</h2>
+      <p class="lead">A PR asks teammates to review your branch and merge it into <strong>main</strong>.</p>
+      <div class="flow">
+        <span class="node">Push branch</span><span class="arw">→</span>
+        <span class="node">Open PR</span><span class="arw">→</span>
+        <span class="node">Review</span><span class="arw">→</span>
+        <span class="node">Merge</span>
+      </div>
+      <ol>
+        <li>Push your branch, then open the repo on GitHub — click <strong>“Compare &amp; pull request”</strong> (or <em>Pull requests → New</em>).</li>
+        <li>Set <strong>base: main</strong> ← <strong>compare: your branch</strong>.</li>
+        <li>Write a clear title and describe <em>what changed and why</em>; link issues with <code>#123</code>.</li>
+        <li>Add <strong>reviewers</strong> on the right sidebar, then <strong>Create pull request</strong>.</li>
+        <li>Address feedback by pushing more commits — the PR updates automatically.</li>
+        <li>Once approved, <strong>Merge</strong>, then <strong>Delete branch</strong> to stay tidy.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- STAGE 7 -->
+  <div class="stage" id="s7">
+    <div class="marker">7</div>
+    <div class="card">
+      <span class="tag">Ship it</span>
+      <h2>Deploy to Vercel</h2>
+      <p class="lead">Vercel publishes the site automatically whenever <strong>main</strong> updates.</p>
+      <div class="flow">
+        <span class="node">Merge → main</span><span class="arw">→</span>
+        <span class="node">Vercel builds</span><span class="arw">→</span>
+        <span class="node">🌐 Live site</span>
+      </div>
+      <h3>Connect the repo (once)</h3>
+      <ol>
+        <li>Go to <a class="link" href="https://vercel.com/new" target="_blank" rel="noopener">vercel.com/new</a> and log in with your office GitHub account.</li>
+        <li>Click <strong>Import</strong> → choose <strong>payprice-design/Push-and-Pull-Knowledge-Base</strong>.</li>
+        <li>For a plain HTML site, keep defaults (no build command), then <strong>Deploy</strong>.</li>
+      </ol>
+      <h3>After that</h3>
+      <ul>
+        <li><strong>Production:</strong> every merge to <em>main</em> updates the live URL.</li>
+        <li><strong>Preview:</strong> every PR gets its own temporary URL — check it before merging.</li>
+      </ul>
+      <div class="code"><pre><span class="c"># Optional — deploy from the terminal</span>
+<span class="k">npm</span> i -g vercel
+<span class="k">vercel</span>              <span class="c"># preview</span>
+<span class="k">vercel</span> --prod       <span class="c"># production</span></pre></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Push &amp; Pull Knowledge Base · payprice-design</p>
+  <p style="margin-top:6px">Questions? Ask your team lead or open an issue on <a href="https://github.com/payprice-design/Push-and-Pull-Knowledge-Base" target="_blank" rel="noopener">GitHub</a>.</p>
+</footer>
+
+</body>
+</html>
