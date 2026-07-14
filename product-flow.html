@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Delivery Flow · PRCNG</title>
+<style>
+  :root{
+    --ink:#0f1b2d;
+    --muted:#5b6b82;
+    --page:#eef3fb;
+    --band-shape:#e6effe;
+    --band-plan:#eef4ff;
+    --band-ship:#e9f6ee;
+    --nav:#0b3f8f;
+    --nav-2:#0a327a;
+    --gold:#ffd24d;
+    --line:#2f6fed;
+    --line-gray:#98a4b6;
+    --line-red:#e5484d;
+
+    --blue-fill:#c3ddff;   --blue-bd:#2f6fed;   --blue-role:#2f6fed;
+    --green-fill:#bff0d4;  --green-bd:#1f9d5f;  --green-role:#16a34a;
+    --pink-fill:#ffc6da;   --pink-bd:#e0468b;   --pink-role:#db2777;
+    --red-fill:#ffc4cd;    --red-bd:#e5484d;    --red-role:#e11d48;
+    --orange-fill:#ffdcab; --orange-bd:#ec9612; --orange-role:#d97706;
+    --gray-fill:#dde3ec;   --gray-bd:#9aa4b6;   --gray-role:#5b6b82;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--page);color:var(--ink);line-height:1.4;
+  }
+
+  /* ---- legend header ---- */
+  .topbar{background:linear-gradient(180deg,var(--nav),var(--nav-2));color:#fff;position:relative;overflow:hidden}
+  .topbar::before{content:"";position:absolute;left:0;top:0;bottom:0;width:92px;background:linear-gradient(180deg,#f6a623,#f08a1d);clip-path:polygon(0 0,100% 0,58% 100%,0 100%)}
+  .tb-inner{position:relative;max-width:1320px;margin:0 auto;padding:14px 22px 16px 118px}
+  .tb-lead{font-style:italic;font-weight:800;font-size:15px;letter-spacing:.01em}
+  .tb-lead .g{color:var(--gold)}
+  .tb-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:11px}
+  .st-label{display:inline-flex;align-items:center;gap:7px;background:#fff;color:var(--nav);font-weight:800;font-size:12px;padding:5px 11px;border-radius:999px}
+  .st-label .k{background:var(--nav);color:#fff;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px}
+  .pill{background:#fff;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;border:1.5px solid;white-space:nowrap}
+  .pill.todo{color:#5b6b82;border-color:#c2cad6}
+  .pill.blue{color:#1e5fd0;border-color:#8fb6f5}
+  .pill.green{color:#16924e;border-color:#7bd3a3}
+  .pill.red{color:#d1373c;border-color:#f0a3a6;background:#fff1f1}
+  .arw{color:#bcd0f2;font-weight:800;font-size:13px}
+  .split{width:1px;height:20px;background:rgba(255,255,255,.28);margin:0 4px}
+
+  /* ---- canvas ---- */
+  .scroll{overflow:auto;-webkit-overflow-scrolling:touch;padding:0 0 40px}
+  .stage{position:relative;width:1320px;height:1230px;margin:0 auto}
+
+  .band{position:absolute;left:0;right:0;z-index:0}
+  .band .blabel{position:absolute;left:18px;top:14px;display:inline-flex;align-items:center;gap:8px;
+    background:#fff;border:1px solid #d4deee;color:var(--ink);font-weight:800;font-size:13px;
+    padding:5px 12px 5px 6px;border-radius:999px;box-shadow:0 1px 2px rgba(15,27,45,.06)}
+  .band .blabel .n{background:var(--nav);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px}
+
+  svg#edges{position:absolute;inset:0;width:1320px;height:1230px;z-index:1;pointer-events:none;overflow:visible}
+
+  .pgroup{position:absolute;z-index:1;border:2px dashed #9db4d8;border-radius:18px;background:rgba(255,255,255,.35)}
+  .pgroup .glabel{position:absolute;left:16px;top:-13px;background:#41506a;color:#fff;font-size:11px;font-weight:800;
+    letter-spacing:.05em;padding:4px 11px;border-radius:999px}
+
+  .node{position:absolute;z-index:2;border-radius:14px;border:2px solid var(--gray-bd);
+    background:var(--gray-fill);padding:11px 13px;box-shadow:0 3px 10px rgba(15,27,45,.10)}
+  .node .row{display:flex;align-items:center;gap:8px}
+  .node .code{background:rgba(15,27,45,.10);color:var(--ink);font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:6px}
+  .node .emoji{font-size:15px;line-height:1}
+  .node .ava{margin-left:auto;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;
+    background:rgba(255,255,255,.6);font-size:13px}
+  .node .title{font-weight:800;font-size:15px;margin:8px 0 9px;letter-spacing:-.01em;color:var(--ink)}
+  .node .foot{display:flex;align-items:center;gap:8px}
+  .node .role{color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--gray-role)}
+  .node .sub{color:var(--muted);font-size:12px;font-weight:600}
+
+  .node.blue{background:var(--blue-fill);border-color:var(--blue-bd)}    .node.blue .role{background:var(--blue-role)}
+  .node.green{background:var(--green-fill);border-color:var(--green-bd)} .node.green .role{background:var(--green-role)}
+  .node.pink{background:var(--pink-fill);border-color:var(--pink-bd)}    .node.pink .role{background:var(--pink-role)}
+  .node.red{background:var(--red-fill);border-color:var(--red-bd)}       .node.red .role{background:var(--red-role)}
+  .node.orange{background:var(--orange-fill);border-color:var(--orange-bd)} .node.orange .role{background:var(--orange-role)}
+  .node.gray{background:var(--gray-fill);border-color:var(--gray-bd)}    .node.gray .role{background:var(--gray-role)}
+
+  .node.dec{background:#fff;border-color:#243347;border-radius:16px;box-shadow:0 4px 14px rgba(15,27,45,.14);display:grid;place-items:center;text-align:center}
+  .node.dec .title{margin:0;font-size:15.5px}
+  .node.dec .q{color:var(--muted);font-size:12px;font-weight:700;margin-top:3px}
+
+  .elabel{position:absolute;z-index:3;transform:translate(-50%,-50%);
+    font-size:12px;font-weight:800;color:#243347;background:rgba(240,245,252,.94);
+    padding:2px 7px;border-radius:6px;white-space:nowrap}
+  .elabel.mut{color:var(--muted)}
+
+  .foot-note{max-width:1320px;margin:0 auto;padding:6px 22px 30px;color:var(--muted);font-size:13px}
+  .foot-note a{color:var(--line)}
+  .foot-note .infer{background:#fff7e6;border:1px solid #f2d99b;color:#8a6a1f;border-radius:10px;padding:10px 13px;display:inline-block;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-inner">
+    <div class="tb-lead">three ways: <span class="g">colour = who, band = when, chip = Jira state.</span></div>
+    <div class="tb-legend">
+      <span class="st-label"><span class="k">PRCNG</span> state</span>
+      <span class="pill todo">TODO</span><span class="arw">→</span>
+      <span class="pill blue">In Progress</span><span class="arw">→</span>
+      <span class="pill blue">Dev Done</span><span class="arw">→</span>
+      <span class="pill blue">In QA / UAT</span><span class="arw">→</span>
+      <span class="pill blue">Ready Deploy (PROD)</span><span class="arw">→</span>
+      <span class="pill green">Done</span>
+      <span class="split"></span>
+      <span class="pill red">↩ Release Rollback</span>
+    </div>
+  </div>
+</div>
+
+<div class="scroll">
+  <div class="stage" id="stage">
+
+    <!-- bands -->
+    <div class="band" style="top:0;height:648px;background:var(--band-shape)"><span class="blabel"><span class="n">01</span> Shape</span></div>
+    <div class="band" style="top:648px;height:340px;background:var(--band-plan)"><span class="blabel"><span class="n">02</span> Plan</span></div>
+    <div class="band" style="top:988px;height:242px;background:var(--band-ship)"><span class="blabel"><span class="n">03</span> Build &amp; Ship</span></div>
+
+    <!-- parallel container -->
+    <div class="pgroup" style="left:212px;top:806px;width:1046px;height:166px"><span class="glabel">⇄ PARALLEL</span></div>
+
+    <!-- edges drawn here -->
+    <svg id="edges" viewBox="0 0 1320 1230" preserveAspectRatio="none"></svg>
+
+    <!-- nodes injected by script -->
+  </div>
+</div>
+
+<div class="foot-note">
+  Product delivery flow · PRCNG &nbsp;·&nbsp; <a href="index.html">← back to the push &amp; pull guide</a>
+  <div class="infer">Note: your source image was cropped at the <strong>PARALLEL</strong> lane. Everything above it mirrors the original; the <strong>03 Build &amp; Ship</strong> row (deploy → done) is my extrapolation from the Jira-state legend. Tell me the real steps and I will correct it.</div>
+</div>
+
+<script>
+(function(){
+  var stage = document.getElementById('stage');
+  var svg   = document.getElementById('edges');
+  var SVGNS = 'http://www.w3.org/2000/svg';
+
+  // ---- node data (x,y,w,h in canvas px) ----
+  var NW = 300, LX = 150, CX = 550;           // left col x, center col x
+  var nodes = [
+    {id:'S1',  x:CX, y:90,  w:NW, h:82,  cls:'gray',  code:'S1',  emoji:'💡', title:'Idea / intake',            role:'Any PIC', sub:'PM triage'},
+    {id:'S2',  x:LX, y:198, w:NW, h:82,  cls:'green', code:'S2',  emoji:'📊', title:'Opportunity sizing',       role:'BI'},
+    {id:'S3',  x:CX, y:198, w:NW, h:82,  cls:'blue',  code:'S3',  emoji:'📋', title:'Prioritise + go / no-go',  role:'PM', sub:'· PjM'},
+    {id:'D1',  x:585,y:314, w:230,h:86,  cls:'dec',   title:'experiment?', q:'◇ sets the label'},
+    {id:'S4',  x:LX, y:436, w:NW, h:84,  cls:'blue',  code:'S4',  emoji:'📐', title:'EDD — hypothesis + decision rule', role:'PM', sub:'· BI'},
+    {id:'PRD', x:CX, y:436, w:NW, h:84,  cls:'blue',  code:'PRD', emoji:'📝', title:'PRD · optional (either lane)', role:'PM'},
+    {id:'D2',  x:575,y:548, w:250,h:88,  cls:'dec',   title:'Config-only, or needs build?', q:'◇ lever'},
+    {id:'CFG', x:LX, y:686, w:NW, h:84,  cls:'blue',  code:'CFG', emoji:'⚙️', title:'Config change',            role:'PM'},
+    {id:'UX',  x:CX, y:686, w:NW, h:84,  cls:'pink',  code:'UX',  emoji:'🎨', title:'UX crafting',              role:'Designer'},
+    {id:'TSB', x:250,y:842, w:288,h:84,  cls:'red',   code:'TSB', emoji:'🧩', title:'BE tech solutioning',      role:'BE'},
+    {id:'TSF', x:594,y:842, w:288,h:84,  cls:'orange',code:'TSF', emoji:'🧩', title:'FE tech solutioning',      role:'FE'},
+    {id:'QTP', x:938,y:842, w:288,h:84,  cls:'green', code:'QTP', emoji:'✅', title:'QA test plan',             role:'QA'},
+    {id:'DEP', x:CX, y:1016,w:NW, h:82,  cls:'blue',  code:'RD',  emoji:'🚀', title:'Ready deploy (PROD)',      role:'Eng', sub:'· PjM'},
+    {id:'DONE',x:585,y:1128,w:230,h:74,  cls:'green', code:'✔',   emoji:'🎉', title:'Done · live',              role:'PM'}
+  ];
+  var map = {};
+  nodes.forEach(function(n){ map[n.id]=n; });
+
+  // ---- render nodes ----
+  nodes.forEach(function(n){
+    var el = document.createElement('div');
+    el.className = 'node ' + n.cls;
+    el.style.left = n.x+'px'; el.style.top = n.y+'px';
+    el.style.width = n.w+'px'; el.style.height = n.h+'px';
+    if(n.cls==='dec'){
+      el.innerHTML = '<div><div class="title">'+n.title+'</div><div class="q">'+n.q+'</div></div>';
+    }else{
+      var foot = '<span class="role">'+n.role+'</span>' + (n.sub?'<span class="sub">'+n.sub+'</span>':'');
+      el.innerHTML =
+        '<div class="row"><span class="code">'+n.code+'</span><span class="emoji">'+n.emoji+'</span>'+
+        '<span class="ava">🧑</span></div>'+
+        '<div class="title">'+n.title+'</div>'+
+        '<div class="foot">'+foot+'</div>';
+    }
+    stage.appendChild(el);
+  });
+
+  // ---- edges ----
+  // sides: t,b,l,r ; kind: solid|dashed|backend|feedback ; label optional
+  var edges = [
+    {f:'S1',fs:'b', t:'S3',ts:'t', kind:'solid'},
+    {f:'S1',fs:'l', t:'S2',ts:'t', kind:'dashed'},
+    {f:'S2',fs:'r', t:'S3',ts:'l', kind:'dashed'},
+    {f:'S3',fs:'b', t:'D1',ts:'t', kind:'solid'},
+    {f:'D1',fs:'l', t:'S4',ts:'t', kind:'solid', label:'experiment'},
+    {f:'D1',fs:'b', t:'PRD',ts:'t',kind:'solid', label:'delivery'},
+    {f:'S4',fs:'r', t:'PRD',ts:'l',kind:'solid'},
+    {f:'PRD',fs:'b',t:'D2',ts:'t', kind:'solid'},
+    {f:'D2',fs:'l', t:'CFG',ts:'t',kind:'solid', label:'config / setting'},
+    {f:'D2',fs:'b', t:'UX',ts:'t', kind:'solid', label:'needs build · UI'},
+    {f:'D2',fs:'r', t:'QTP',ts:'t',kind:'backend', label:'backend · no UI'},
+    {f:'CFG',fs:'b',t:'TSB',ts:'t',kind:'solid'},
+    {f:'UX',fs:'b', t:'TSF',ts:'t',kind:'solid'},
+    {f:'TSB',fs:'b',t:'DEP',ts:'t',kind:'solid'},
+    {f:'TSF',fs:'b',t:'DEP',ts:'t',kind:'solid'},
+    {f:'QTP',fs:'b',t:'DEP',ts:'t',kind:'solid'},
+    {f:'DEP',fs:'b',t:'DONE',ts:'t',kind:'solid'},
+    // feedback loop up the left channel into EDD
+    {f:'CFG',fs:'l',t:'S4',ts:'l', kind:'feedback', channel:96},
+    // release rollback loop
+    {f:'DONE',fs:'r',t:'DEP',ts:'r',kind:'rollback', channel:1252, label:'rollback', mut:true}
+  ];
+
+  function anchor(n,s){
+    switch(s){
+      case 't': return {x:n.x+n.w/2, y:n.y};
+      case 'b': return {x:n.x+n.w/2, y:n.y+n.h};
+      case 'l': return {x:n.x,       y:n.y+n.h/2};
+      case 'r': return {x:n.x+n.w,   y:n.y+n.h/2};
+    }
+  }
+
+  function routePts(e){
+    var a=map[e.f], b=map[e.t];
+    var p=anchor(a,e.fs), q=anchor(b,e.ts);
+    if(e.channel!==undefined){
+      return [p,{x:e.channel,y:p.y},{x:e.channel,y:q.y},q];
+    }
+    // bottom -> top
+    if(e.fs==='b' && e.ts==='t'){
+      if(Math.abs(p.x-q.x)<0.5) return [p,q];
+      var my=(p.y+q.y)/2;
+      return [p,{x:p.x,y:my},{x:q.x,y:my},q];
+    }
+    // side -> top : across to target center then down
+    if((e.fs==='l'||e.fs==='r') && e.ts==='t'){
+      return [p,{x:q.x,y:p.y},q];
+    }
+    // bottom -> side : down to target row then across
+    if(e.fs==='b' && (e.ts==='l'||e.ts==='r')){
+      return [p,{x:p.x,y:q.y},q];
+    }
+    // side -> side : mid x
+    if((e.fs==='l'||e.fs==='r') && (e.ts==='l'||e.ts==='r')){
+      var mx=(p.x+q.x)/2;
+      return [p,{x:mx,y:p.y},{x:mx,y:q.y},q];
+    }
+    return [p,{x:q.x,y:p.y},q];
+  }
+
+  function roundedPath(pts,r){
+    if(pts.length<3) return 'M'+pts[0].x+' '+pts[0].y+' L'+pts[pts.length-1].x+' '+pts[pts.length-1].y;
+    var d='M'+pts[0].x+' '+pts[0].y;
+    for(var i=1;i<pts.length-1;i++){
+      var p0=pts[i-1],p1=pts[i],p2=pts[i+1];
+      var d1=Math.hypot(p1.x-p0.x,p1.y-p0.y), d2=Math.hypot(p2.x-p1.x,p2.y-p1.y);
+      var rr=Math.min(r,d1/2,d2/2);
+      var a={x:p1.x-(p1.x-p0.x)/d1*rr, y:p1.y-(p1.y-p0.y)/d1*rr};
+      var c={x:p1.x+(p2.x-p1.x)/d2*rr, y:p1.y+(p2.y-p1.y)/d2*rr};
+      d+=' L'+a.x.toFixed(1)+' '+a.y.toFixed(1)+' Q'+p1.x+' '+p1.y+' '+c.x.toFixed(1)+' '+c.y.toFixed(1);
+    }
+    var last=pts[pts.length-1];
+    d+=' L'+last.x+' '+last.y;
+    return d;
+  }
+
+  var styles = {
+    solid:   {stroke:'var(--line)',      dash:'',       marker:'aBlue'},
+    dashed:  {stroke:'var(--line-gray)', dash:'6 5',    marker:'aGray'},
+    backend: {stroke:'var(--line-gray)', dash:'6 5',    marker:'aGray'},
+    feedback:{stroke:'var(--line)',      dash:'6 5',    marker:'aBlue'},
+    rollback:{stroke:'var(--line-red)',  dash:'6 5',    marker:'aRed'}
+  };
+
+  // arrow markers
+  var defs=document.createElementNS(SVGNS,'defs');
+  [['aBlue','var(--line)'],['aGray','var(--line-gray)'],['aRed','var(--line-red)']].forEach(function(m){
+    var mk=document.createElementNS(SVGNS,'marker');
+    mk.setAttribute('id',m[0]); mk.setAttribute('viewBox','0 0 10 10');
+    mk.setAttribute('refX','8'); mk.setAttribute('refY','5');
+    mk.setAttribute('markerWidth','7'); mk.setAttribute('markerHeight','7'); mk.setAttribute('orient','auto-start-reverse');
+    var pa=document.createElementNS(SVGNS,'path');
+    pa.setAttribute('d','M0 0 L10 5 L0 10 z'); pa.setAttribute('fill',m[1]);
+    mk.appendChild(pa); defs.appendChild(mk);
+  });
+  svg.appendChild(defs);
+
+  edges.forEach(function(e){
+    var pts=routePts(e);
+    var st=styles[e.kind];
+    var path=document.createElementNS(SVGNS,'path');
+    path.setAttribute('d',roundedPath(pts,9));
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke',st.stroke);
+    path.setAttribute('stroke-width','2.5');
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('stroke-linejoin','round');
+    if(st.dash) path.setAttribute('stroke-dasharray',st.dash);
+    path.setAttribute('marker-end','url(#'+st.marker+')');
+    svg.appendChild(path);
+
+    if(e.label){
+      var mid=pts[Math.floor(pts.length/2)-1] || pts[0];
+      var next=pts[Math.floor(pts.length/2)] || pts[pts.length-1];
+      var lx=(mid.x+next.x)/2, ly=(mid.y+next.y)/2;
+      var lab=document.createElement('div');
+      lab.className='elabel'+(e.mut?' mut':'');
+      lab.textContent=e.label;
+      lab.style.left=lx+'px'; lab.style.top=ly+'px';
+      stage.appendChild(lab);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

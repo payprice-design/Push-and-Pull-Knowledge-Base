@@ -15,10 +15,10 @@
     --accent:#f97316;
     --accent-2:#38bdf8;
     --green:#3fb950;
-    --line:#33445c;
+    --wire-dim:#2b384b;
     --code-bg:#0b0f16;
     --radius:16px;
-    --maxw:860px;
+    --maxw:880px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -38,8 +38,7 @@
   }
   .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(63,185,80,.15)}
   h1{
-    font-size:clamp(28px,7vw,42px);line-height:1.15;letter-spacing:-.02em;margin-bottom:14px;
-    background:linear-gradient(120deg,#fff,#c9d4e2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    font-size:clamp(28px,7vw,42px);line-height:1.15;letter-spacing:-.02em;margin-bottom:14px;color:#fff;
   }
   header p{color:var(--muted);font-size:clamp(15px,4vw,18px);max-width:620px;margin:0 auto}
   .repo-pill{
@@ -48,44 +47,52 @@
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent-2);word-break:break-all;
   }
 
-  /* Cycle diagram */
+  /* Cycle diagram — the everyday loop as connected nodes */
   .cycle{
     max-width:var(--maxw);margin:26px auto 8px;background:var(--surface);
-    border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;
+    border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px 20px;
   }
-  .cycle-title{text-align:center;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
-  .cycle-flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+  .cycle-title{text-align:center;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}
+  .cycle-flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0}
   .cycle-flow .chip{
     display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);
-    padding:9px 13px;border-radius:10px;font-size:13.5px;font-weight:600;white-space:nowrap;
+    padding:9px 13px;border-radius:999px;font-size:13.5px;font-weight:600;white-space:nowrap;
   }
   .cycle-flow .chip .e{font-size:15px}
-  .cycle-flow .arw{color:var(--accent);font-weight:800;font-size:15px}
+  .cycle-flow .seg{width:26px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));flex:none;position:relative}
+  .cycle-flow .seg::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent-2)}
+  .cycle-flow .loop{color:var(--accent);font-weight:800;font-size:16px;margin-left:6px}
 
-  /* Workflow timeline */
-  main{max-width:var(--maxw);margin:34px auto 0}
-  .stage{position:relative;padding-left:64px;padding-bottom:20px}
-  /* vertical connector line */
-  .stage::before{
-    content:"";position:absolute;left:23px;top:6px;bottom:-6px;width:2px;
-    background:linear-gradient(var(--line),var(--line));
-  }
-  .stage:last-child::before{display:none}
+  /* Workflow — the wired flow */
+  main{max-width:var(--maxw);margin:34px auto 0;position:relative}
+  #wire{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+  .stage{position:relative;padding-left:88px;padding-bottom:30px;z-index:1}
   .stage .marker{
-    position:absolute;left:0;top:0;width:48px;height:48px;border-radius:14px;
-    background:linear-gradient(135deg,var(--accent),#fb923c);color:#1a0f05;
-    display:grid;place-items:center;font-size:20px;font-weight:800;
-    box-shadow:0 4px 14px rgba(249,115,22,.28);z-index:1;
+    position:absolute;left:0;top:2px;width:56px;height:56px;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%,#fdba74,var(--accent));color:#1a0f05;
+    display:grid;place-items:center;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;
+    box-shadow:0 0 0 5px var(--bg),0 0 0 6px rgba(249,115,22,.35),0 6px 18px rgba(249,115,22,.30);
+    z-index:2;
+  }
+  .stage:nth-of-type(even) .marker{
+    left:22px;
+    background:radial-gradient(circle at 32% 28%,#7dd3fc,var(--accent-2));color:#04121c;
+    box-shadow:0 0 0 5px var(--bg),0 0 0 6px rgba(56,189,248,.35),0 6px 18px rgba(56,189,248,.30);
   }
   .card{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:clamp(18px,4.5vw,28px);scroll-margin-top:16px;
+    padding:clamp(18px,4.5vw,28px);scroll-margin-top:16px;position:relative;
+  }
+  /* little plug where the wire meets the card */
+  .card::before{
+    content:"";position:absolute;left:-14px;top:26px;width:14px;height:2px;background:var(--wire-dim);
   }
   .card .tag{
     display:inline-block;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
     color:var(--accent);background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);
     padding:3px 9px;border-radius:6px;margin-bottom:10px;
   }
+  .stage:nth-of-type(even) .card .tag{color:var(--accent-2);background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.25)}
   h2{font-size:clamp(19px,5vw,25px);letter-spacing:-.01em;line-height:1.25;margin-bottom:6px}
   h3{font-size:16px;margin:20px 0 9px;color:#fff}
   p{margin-bottom:12px}
@@ -112,24 +119,31 @@
   .tip strong{color:var(--accent-2)}
   .warn strong{color:var(--accent)}
 
-  /* branch → PR → deploy mini-flows */
-  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0;justify-content:center}
-  .flow .node{background:var(--surface-2);border:1px solid var(--border);padding:8px 12px;border-radius:9px;font-size:13px;font-weight:600;white-space:nowrap}
-  .flow .arw{color:var(--accent);font-weight:700}
+  /* mini node flows inside cards */
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:0;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:16px 14px;margin:12px 0;justify-content:center}
+  .flow .node{background:var(--surface-2);border:1px solid var(--border);padding:8px 13px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+  .flow .seg{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;font-weight:600;padding:0 10px;white-space:nowrap}
+  .flow .seg::before,.flow .seg::after{content:"";width:14px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px}
 
   footer{max-width:var(--maxw);margin:30px auto 0;text-align:center;color:var(--muted);font-size:13px;padding-top:24px;border-top:1px solid var(--border)}
   footer a{color:var(--accent-2);text-decoration:none}
 
   @media (max-width:520px){
-    .stage{padding-left:52px}
-    .stage::before{left:19px}
-    .stage .marker{width:40px;height:40px;border-radius:12px;font-size:17px}
-    .cycle-flow{flex-direction:column;align-items:stretch}
-    .cycle-flow .arw{transform:rotate(90deg)}
+    .stage{padding-left:66px;padding-bottom:26px}
+    .stage .marker{width:46px;height:46px;font-size:18px}
+    .stage:nth-of-type(even) .marker{left:14px}
+    .cycle-flow{flex-direction:column;align-items:stretch;gap:0}
     .cycle-flow .chip{justify-content:center}
+    .cycle-flow .seg{width:2px;height:20px;margin:0 auto;background:linear-gradient(180deg,var(--accent),var(--accent-2))}
+    .cycle-flow .seg::after{right:50%;transform:translateX(50%);top:auto;bottom:-1px}
+    .cycle-flow .loop{margin:6px auto 0}
     .flow{flex-direction:column;align-items:stretch}
-    .flow .arw{transform:rotate(90deg);text-align:center}
+    .flow .seg{padding:6px 0;justify-content:center}
+    .flow .seg::before,.flow .seg::after{width:2px;height:12px}
     .flow .node{text-align:center}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .wire-flow{animation:none !important}
   }
 </style>
 </head>
@@ -138,7 +152,7 @@
 <header>
   <div class="badge"><span class="dot"></span> Team Workflow</div>
   <h1>The GitHub Push &amp; Pull Workflow</h1>
-  <p>Follow the flow top to bottom — from creating your office account to deploying on Vercel.</p>
+  <p>Follow the wire top to bottom — from creating your office account to deploying on Vercel.</p>
   <div class="repo-pill">📦 github.com/payprice-design/Push-and-Pull-Knowledge-Base</div>
 </header>
 
@@ -147,21 +161,37 @@
   <div class="cycle-title">The everyday loop</div>
   <div class="cycle-flow">
     <span class="chip"><span class="e">🌿</span> Branch</span>
-    <span class="arw">→</span>
+    <span class="seg"></span>
     <span class="chip"><span class="e">✏️</span> Commit</span>
-    <span class="arw">→</span>
+    <span class="seg"></span>
     <span class="chip"><span class="e">⬆️</span> Push</span>
-    <span class="arw">→</span>
+    <span class="seg"></span>
     <span class="chip"><span class="e">🔀</span> PR</span>
-    <span class="arw">→</span>
+    <span class="seg"></span>
     <span class="chip"><span class="e">✅</span> Merge</span>
-    <span class="arw">→</span>
+    <span class="seg"></span>
     <span class="chip"><span class="e">🔄</span> Sync</span>
-    <span class="arw">↺</span>
+    <span class="loop">↺</span>
   </div>
 </div>
 
 <main>
+  <!-- wire canvas is injected/drawn by script -->
+  <svg id="wire" aria-hidden="true" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="wireGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#f97316"/>
+        <stop offset="1" stop-color="#38bdf8"/>
+      </linearGradient>
+      <filter id="wireGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path id="wireBase" fill="none" stroke="var(--wire-dim)" stroke-width="3" stroke-linecap="round"/>
+    <path id="wireFlow" class="wire-flow" fill="none" stroke="url(#wireGrad)" stroke-width="3.5"
+          stroke-linecap="round" filter="url(#wireGlow)" stroke-dasharray="0.1 26"/>
+  </svg>
 
   <!-- STAGE 1 -->
   <div class="stage" id="s1">
@@ -242,8 +272,8 @@
       <h2>Push, Pull &amp; Sync</h2>
       <p class="lead">Move commits between your computer (local) and GitHub (remote).</p>
       <div class="flow">
-        <span class="node">💻 Local</span><span class="arw">— push →</span>
-        <span class="node">☁️ GitHub</span><span class="arw">— pull →</span>
+        <span class="node">💻 Local</span><span class="seg">push</span>
+        <span class="node">☁️ GitHub</span><span class="seg">pull</span>
         <span class="node">💻 Local</span>
       </div>
       <h3>Push — send commits up</h3>
@@ -272,9 +302,9 @@
       <h2>Contribute &amp; open a Pull Request</h2>
       <p class="lead">A PR asks teammates to review your branch and merge it into <strong>main</strong>.</p>
       <div class="flow">
-        <span class="node">Push branch</span><span class="arw">→</span>
-        <span class="node">Open PR</span><span class="arw">→</span>
-        <span class="node">Review</span><span class="arw">→</span>
+        <span class="node">Push branch</span><span class="seg"></span>
+        <span class="node">Open PR</span><span class="seg"></span>
+        <span class="node">Review</span><span class="seg"></span>
         <span class="node">Merge</span>
       </div>
       <ol>
@@ -296,8 +326,8 @@
       <h2>Deploy to Vercel</h2>
       <p class="lead">Vercel publishes the site automatically whenever <strong>main</strong> updates.</p>
       <div class="flow">
-        <span class="node">Merge → main</span><span class="arw">→</span>
-        <span class="node">Vercel builds</span><span class="arw">→</span>
+        <span class="node">Merge → main</span><span class="seg"></span>
+        <span class="node">Vercel builds</span><span class="seg"></span>
         <span class="node">🌐 Live site</span>
       </div>
       <h3>Connect the repo (once)</h3>
@@ -324,6 +354,76 @@
   <p>Push &amp; Pull Knowledge Base · payprice-design</p>
   <p style="margin-top:6px">Questions? Ask your team lead or open an issue on <a href="https://github.com/payprice-design/Push-and-Pull-Knowledge-Base" target="_blank" rel="noopener">GitHub</a>.</p>
 </footer>
+
+<script>
+(function(){
+  var main   = document.querySelector('main');
+  var svg    = document.getElementById('wire');
+  var base   = document.getElementById('wireBase');
+  var flow   = document.getElementById('wireFlow');
+  var grad   = document.getElementById('wireGrad');
+
+  function draw(){
+    var markers = Array.prototype.slice.call(document.querySelectorAll('.stage .marker'));
+    if(markers.length < 2) return;
+    var m = main.getBoundingClientRect();
+    var w = main.offsetWidth, h = main.offsetHeight;
+
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    grad.setAttribute('y2', h);
+
+    // centre point of every node port
+    var pts = markers.map(function(el){
+      var r = el.getBoundingClientRect();
+      return { x: r.left - m.left + r.width/2, y: r.top - m.top + r.height/2 };
+    });
+
+    // smooth cable threading through each port (vertical bezier)
+    var d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for(var i=1;i<pts.length;i++){
+      var a = pts[i-1], b = pts[i];
+      var c1y = a.y + (b.y - a.y) * 0.55;
+      var c2y = a.y + (b.y - a.y) * 0.45;
+      d += ' C ' + a.x.toFixed(1) + ' ' + c1y.toFixed(1) + ', '
+                 + b.x.toFixed(1) + ' ' + c2y.toFixed(1) + ', '
+                 + b.x.toFixed(1) + ' ' + b.y.toFixed(1);
+    }
+    base.setAttribute('d', d);
+    flow.setAttribute('d', d);
+
+    // animate light pulses travelling down the length of the cable
+    var len = flow.getTotalLength ? flow.getTotalLength() : h;
+    flow.style.strokeDasharray = '0.1 ' + (len/9).toFixed(1);
+  }
+
+  // flowing pulse via dashoffset (paused when reduced-motion is set — see CSS)
+  var start = null, len = 0;
+  function tick(t){
+    if(start === null) start = t;
+    if(!len){ len = flow.getTotalLength ? flow.getTotalLength() : main.offsetHeight; }
+    var period = 3400; // ms for one segment gap
+    var seg = len/9;
+    var off = -((t - start) % period) / period * seg;
+    flow.style.strokeDashoffset = off.toFixed(2);
+    requestAnimationFrame(tick);
+  }
+
+  function boot(){
+    draw();
+    if(!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      requestAnimationFrame(tick);
+    }
+  }
+
+  if(document.readyState === 'complete') boot();
+  else window.addEventListener('load', boot);
+  window.addEventListener('resize', function(){ len = 0; draw(); });
+  if(window.ResizeObserver){ new ResizeObserver(function(){ len = 0; draw(); }).observe(main); }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(draw); }
+})();
+</script>
 
 </body>
 </html>
